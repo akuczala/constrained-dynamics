@@ -37,9 +37,6 @@ class ConstraintMapper(Constraint):
     def constraint(self, q):
         return self.map_constraints(lambda c: c.constraint, q)
 
-    # todo need to differentiate each constraint by each qj (dc_i/d_qj)
-    # to get a N_constraints x  (N_particles * N_dims) matrix
-    # the number of constraints M and number of particles may be different
     def constraint_jac(self, q):
         return self.map_constraints(lambda c: c.constraint_jac, q)
 

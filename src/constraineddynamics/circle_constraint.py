@@ -50,7 +50,6 @@ class CoupledCircleConstraint(MultipleParticleConstraint):
         return 0.5 * ((lambda xr: np.dot(xr, xr))(self.delta_x(xs)) - self.radius ** 2)
 
     def constraint_jac(self, q):
-        # print(self.delta_x(self.ps.q_to_xs(q)))
         return self.apply_to_particles_vec([lambda xs: -self.delta_x(xs), self.delta_x], q)
 
     def constraint_jac_dt(self, q, qdot):
