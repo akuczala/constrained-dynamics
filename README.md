@@ -1,0 +1,1 @@
+See [Andrew Witkin's course on physically-based modeling](https://www.cs.cmu.edu/~baraff/sigcourse/).
