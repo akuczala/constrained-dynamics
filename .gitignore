@@ -1,0 +1,4 @@
+src/*.egg-info/*
+.ipynb_checkpoints/*
+.idea/*
+**/__pycache__/*
