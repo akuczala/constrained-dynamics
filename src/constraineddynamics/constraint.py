@@ -1,10 +1,13 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
-from typing import List
+from typing import List, TypeVar, Callable
 
 import numpy as np
 
 from .particle_system import ParticleSystem
+from .types import QVec, SpaceVecs
+
+_T = TypeVar("_T")
 
 
 @dataclass
@@ -12,18 +15,18 @@ class Constraint(ABC):
     ps: ParticleSystem
 
     @abstractmethod
-    def constraint(self, q):
+    def constraint(self, q: QVec):
         pass
 
-    def constraint_dt(self, q, qdot):
+    def constraint_dt(self, q: QVec, qdot: QVec):
         return np.dot(self.constraint_jac(q), qdot)
 
     @abstractmethod
-    def constraint_jac(self, q):
+    def constraint_jac(self, q: QVec):
         pass
 
     @abstractmethod
-    def constraint_jac_dt(self, q, qdot):
+    def constraint_jac_dt(self, q: QVec, qdot: QVec):
         pass
 
 
@@ -48,14 +51,14 @@ class ConstraintMapper(Constraint):
 class SingleParticleConstraint(Constraint, ABC):
     apply_to: int
 
-    def apply_to_particle(self, f, q):
+    def apply_to_particle(self, f: Callable[[np.ndarray], _T], q) -> _T:
         return f(self.ps.q_to_xs(q)[self.apply_to])
 
-    def apply_to_particle_vec(self, f, q):
-        return self.ps.xs_to_q(np.array([
+    def apply_to_particle_vec(self, f, q: QVec) -> QVec:
+        return self.ps.xs_to_q(SpaceVecs(np.array([
             f(x) if i == self.apply_to else np.zeros_like(x)
             for i, x in enumerate(self.ps.q_to_xs(q))
-        ]))
+        ])))
 
 
 @dataclass

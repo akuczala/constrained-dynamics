@@ -1,8 +1,8 @@
 import numpy as np
 
-from src.constraineddynamics.circle_constraint import CircleConstraint, CoupledCircleConstraint
-from src.constraineddynamics.particle_system import ParticleSystem
-from src.constraineddynamics.simulation import Simulator
+from constraineddynamics.circle_constraint import CircleConstraint, CoupledCircleConstraint
+from constraineddynamics.particle_system import ParticleSystem
+from constraineddynamics.simulation import Simulator
 
 
 def run_simulator_methods(simulator: Simulator, q0, qdot0):
