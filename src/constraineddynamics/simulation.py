@@ -6,6 +6,7 @@ import scipy.integrate as nint
 
 from .constraint import ConstraintMapper, Constraint
 from .particle_system import ParticleSystem
+from .types import QVec, ConstraintVec, SimVec
 
 
 class Simulator:
@@ -13,7 +14,7 @@ class Simulator:
         self.particle_system = particle_system
         self.constraint_mapper = ConstraintMapper(constraints=constraints, ps=particle_system)
 
-    def lagrange_multiplier(self, q, qdot, f):
+    def lagrange_multiplier(self, q: QVec, qdot: QVec, f: QVec) -> ConstraintVec:
         J = self.constraint_mapper.constraint_jac(q)
         W = self.particle_system.inverse_mass(q)
         JW = np.dot(J, W)
@@ -25,25 +26,27 @@ class Simulator:
         )
         return lin.lstsq(A, b)[0]
 
-    def net_acceleration(self, q, qdot, f):
+    def net_acceleration(self, q: QVec, qdot: QVec, f: QVec) -> QVec:
         J = self.constraint_mapper.constraint_jac(q)
         W = self.particle_system.inverse_mass(q)
         f_constraint = np.dot(J.T, self.lagrange_multiplier(q, qdot, f))
-        return np.dot(W, f + f_constraint)
+        return QVec(np.dot(W, f + f_constraint))
 
-    def _ode_y(self, t, y):
-        x, xdot = self.particle_system.y_to_qqdot(y)
-        dx = xdot
-        dxdot = self.net_acceleration(x, xdot, self.force(x))
-        return self.particle_system.qqdot_to_y(dx, dxdot)
+    def _ode_y(self, t: float, y: SimVec) -> SimVec:
+        q, qdot = self.particle_system.y_to_qqdot(y)
+        dq = qdot
+        dqdot = self.net_acceleration(q, qdot, self.force(q, qdot))
+        return self.particle_system.qqdot_to_y(dq, dqdot)
 
-    def simulate(self, y0, t_range):
+    def simulate(self, q0: QVec, qdot0: QVec, t_range: np.ndarray):
         return nint.solve_ivp(self._ode_y,
-                              y0=y0,
+                              y0=self.particle_system.qqdot_to_y(q0, qdot0),
                               t_span=(t_range[0], t_range[-1]),
                               t_eval=t_range,
                               dense_output=True
                               )
 
-    def force(self, q):
-        return np.kron(self.particle_system.masses, -np.eye(len(q) // self.particle_system.n_particles)[1])
+    def force(self, q: QVec, qdot: QVec) -> QVec:
+        return QVec(
+            np.kron(self.particle_system.masses, -np.eye(len(q) // self.particle_system.n_particles)[1])
+        )
