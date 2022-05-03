@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Callable
 
 import numpy as np
 
@@ -10,6 +10,7 @@ from .types import ParticleVec, SimVec, QVec, SpaceVecs, QMatrix
 class ParticleSystem:
     dim: int
     masses: ParticleVec
+    force: Callable[[QVec, QVec], QVec]
 
     @property
     def n_particles(self) -> int:

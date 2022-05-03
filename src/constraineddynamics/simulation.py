@@ -35,7 +35,7 @@ class Simulator:
     def _ode_y(self, t: float, y: SimVec) -> SimVec:
         q, qdot = self.particle_system.y_to_qqdot(y)
         dq = qdot
-        dqdot = self.net_acceleration(q, qdot, self.force(q, qdot))
+        dqdot = self.net_acceleration(q, qdot, self.particle_system.force(q, qdot))
         return self.particle_system.qqdot_to_y(dq, dqdot)
 
     def simulate(self, q0: QVec, qdot0: QVec, t_range: np.ndarray):
@@ -45,8 +45,3 @@ class Simulator:
                               t_eval=t_range,
                               dense_output=True
                               )
-
-    def force(self, q: QVec, qdot: QVec) -> QVec:
-        return QVec(
-            np.kron(self.particle_system.masses, -np.eye(len(q) // self.particle_system.n_particles)[1])
-        )
